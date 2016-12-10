@@ -1,12 +1,11 @@
-const WebSocketServer = require('uws').Server;
+const { Server } = require('uws');
 
-const wss = new WebSocketServer({ port: 3000 });
+const wss = new Server({ port: 3000 });
 const clients = [];
 
 function onMessage(ws, message) {
-    // TODO: should handle illegal JSON...
+    // TODO: should handle illegal JSON so the server can't crash...
     const payload = JSON.parse(message);
-    console.log('received:', payload);
     if (payload.type === 'MOVE_MY_CURSOR') {
         clients.forEach((client) => {
             client.send(JSON.stringify({
@@ -16,7 +15,6 @@ function onMessage(ws, message) {
         });
     }
 }
-
 
 wss.on('connection', function(ws) {
     clients.push(ws);
@@ -28,5 +26,3 @@ wss.on('connection', function(ws) {
         }
     });
 });
-
-wss.on

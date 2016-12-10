@@ -58,16 +58,22 @@ function initialize() {
     document.onmousemove = debounce(handleMouseMove, 10);
     const width = window.innerWidth;
     const height = window.innerHeight;
+    const header = document.getElementById('header');
 
     function handleMouseMove(event) {
+        const x = event.pageX;
+        const y = event.pageY;
         wssSend({
             type: 'MOVE_MY_CURSOR',
             data: {
                 id: uniqueId,
-                x: (event.pageX / width) * 100,
-                y: (event.pageY / height) * 100,
+                x: (x / width) * 100,
+                y: (y / height) * 100,
             },
         });
+
+        // This doesn't make any sense, but so does life :')
+        header.style.transform = `rotate(${x - y}deg)`;
     }
 }
 
