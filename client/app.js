@@ -5,44 +5,46 @@ import Socket from './Socket';
 // Socket logic
 const uniqueId = uuid();
 
-const activeCursors = {};
+let activeCursors = {};
 
 const socket = new Socket(uniqueId, {
-    open: initialize,
+    open: handleSocketOpen,
     MOVE_EXT_CURSOR: handleExtCursor,
     DELETE_CURSOR: deleteCursor,
 });
 
-// Cursor tracking logic
-function initialize() {
-    window.addEventListener('mousemove', throttle(handleMouseMove, 20));
-    window.addEventListener('resize', handleResize);
-    let width;
-    let height;
-    handleResize();
+const header = document.getElementById('header');
+window.addEventListener('mousemove', throttle(handleMouseMove, 20));
+window.addEventListener('resize', handleResize);
+let width;
+let height;
+handleResize();
 
-    const header = document.getElementById('header');
+function handleResize(event) {
+    width = window.innerWidth;
+    height = window.innerHeight;
+}
 
-    function handleResize(event) {
-        width = window.innerWidth;
-        height = window.innerHeight;
-    }
+function handleSocketOpen() {
+    // After the WebSocket has been opened, we need to reset because we might
+    // have missed some delete events.
+    activeCursors = {};
+}
 
-    function handleMouseMove(event) {
-        const x = event.pageX;
-        const y = event.pageY;
-        socket.send({
-            type: 'MOVE_MY_CURSOR',
-            data: {
-                id: uniqueId,
-                x: (x / width) * 100,
-                y: (y / height) * 100,
-            },
-        });
+function handleMouseMove(event) {
+    const x = event.pageX;
+    const y = event.pageY;
+    socket.send({
+        type: 'MOVE_MY_CURSOR',
+        data: {
+            id: uniqueId,
+            x: (x / width) * 100,
+            y: (y / height) * 100,
+        },
+    });
 
-        // This doesn't make any sense, but so does life :')
-        header.style.transform = `rotate(${x - y}deg)`;
-    }
+    // This doesn't make any sense, but so does life :')
+    header.style.transform = `rotate(${x - y}deg)`;
 }
 
 // External cursors logic

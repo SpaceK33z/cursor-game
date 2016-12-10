@@ -1,13 +1,14 @@
-export default function(id, handlers) {
+function Socket(id, handlers) {
     const wss = new WebSocket(`${CONFIG.socketUrl}?id=${id}`);
 
     wss.onopen = function(evt) {
         handlers.open();
     };
 
-    wss.onclose = function(evt) {
-        // TODO: retry logic
-        // handlers.close();
+    wss.onclose = (evt) => {
+        setTimeout(() => {
+            Socket.call(this, id, handlers);
+        }, 100);
     };
 
     wss.onmessage = function(evt) {
@@ -21,3 +22,5 @@ export default function(id, handlers) {
         wss.send(JSON.stringify(msg));
     }
 }
+
+export default Socket;
