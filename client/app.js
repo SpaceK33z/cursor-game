@@ -1,6 +1,6 @@
 // Socket logic
 
-const WEBSOCKET_URL = 'ws://localhost:3000';
+const WEBSOCKET_URL = `ws://${location.hostname}:${location.port}/ws`;
 
 const uniqueId = guid();
 const wss = new WebSocket(`${WEBSOCKET_URL}?id=${uniqueId}`);
