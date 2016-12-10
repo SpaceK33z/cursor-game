@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack",
-    "client": "webpack-dev-server",
+    "client": "CURSOR_SOCKET_URL=ws://localhost:3000 webpack-dev-server",
     "start": "nodemon"
   },
   "author": "Kees Kluskens <kees@webduck.nl>",
@@ -16,6 +16,7 @@
     "uws": "^0.12.0"
   },
   "devDependencies": {
+    "file-loader": "^0.9.0",
     "html-webpack-plugin": "^2.24.1",
     "webpack": "2.1.0-beta.27",
     "webpack-dev-server": "2.1.0-beta.12"

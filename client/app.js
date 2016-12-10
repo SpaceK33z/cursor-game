@@ -1,9 +1,6 @@
 // Socket logic
-
-const WEBSOCKET_URL = `ws://${location.hostname}:${location.port}/ws`;
-
 const uniqueId = guid();
-const wss = new WebSocket(`${WEBSOCKET_URL}?id=${uniqueId}`);
+const wss = new WebSocket(`${CONFIG.socketUrl}?id=${uniqueId}`);
 
 function wssSend(msg) {
     wss.send(JSON.stringify(msg));
