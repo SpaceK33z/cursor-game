@@ -1,42 +1,17 @@
 import throttle from 'lodash.throttle';
+import uuid from './uuid';
+import Socket from './Socket';
 
 // Socket logic
-const uniqueId = guid();
-const wss = new WebSocket(`${CONFIG.socketUrl}?id=${uniqueId}`);
+const uniqueId = uuid();
 
-function wssSend(msg) {
-    wss.send(JSON.stringify(msg));
-}
+const activeCursors = {};
 
-wss.onopen = function(evt) {
-    initialize();
-};
-
-wss.onmessage = function(evt) {
-    const payload = JSON.parse(evt.data);
-    if (payload.type === 'MOVE_EXT_CURSOR') {
-        handleExtCursor(payload.data);
-    }
-    if (payload.type === 'DELETE_CURSOR') {
-        deleteCursor(payload.data);
-    }
-};
-
-wss.onclose = function(evt) {
-    console.log('Closed', evt);
-};
-
-// UUID generation
-function guid() {
-  return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-    s4() + '-' + s4() + s4() + s4();
-}
-
-function s4() {
-  return Math.floor((1 + Math.random()) * 0x10000)
-    .toString(16)
-    .substring(1);
-}
+const socket = new Socket(uniqueId, {
+    open: initialize,
+    MOVE_EXT_CURSOR: handleExtCursor,
+    DELETE_CURSOR: deleteCursor,
+});
 
 // Cursor tracking logic
 function initialize() {
@@ -56,7 +31,7 @@ function initialize() {
     function handleMouseMove(event) {
         const x = event.pageX;
         const y = event.pageY;
-        wssSend({
+        socket.send({
             type: 'MOVE_MY_CURSOR',
             data: {
                 id: uniqueId,
@@ -76,6 +51,9 @@ function handleExtCursor(data) {
     const y = data.y;
     const id = data.id;
 
+    activeCursors[id] = { x, y };
+    calcColors();
+
     let el = document.getElementById(id);
     if (!el) {
         el = document.createElement('div');
@@ -89,9 +67,33 @@ function handleExtCursor(data) {
 
 // Delete cursor logic
 function deleteCursor(data) {
+    delete activeCursors[data.id];
+    calcColors();
     const el = document.getElementById(data.id);
 
     if (el) {
         document.body.removeChild(el);
     }
+}
+
+function calcColors() {
+    // Contains the x + y values (in percent) for all active cursors.
+    // So if there is only one cursor, and it is at the most top right of the screen, this would be 200.
+    // For two users at the most top right of the screen, this would be 400.
+    let totalValue = 0;
+    // Amount of active cursors
+    let length = 0;
+    for (const c in activeCursors) {
+        const data = activeCursors[c];
+        totalValue += data.x + data.y;
+        length += 1;
+    }
+    // Hue can be 0 - 360.
+    // TODO: `totalValue /length` can only be maximum 200, should do some calculations so it can go to 360.
+    const hue = totalValue / length;
+    // Saturation can be 0 - 100.
+    // TDOO: hmm this is boring, do some weird calculation or something.
+    const saturation = totalValue / length / 2;
+    // Lightness can be 0 - 100.
+    document.body.style.background = `hsl(${hue}, ${saturation}%, 50%)`;
 }
