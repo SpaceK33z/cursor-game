@@ -85,7 +85,7 @@ function calcColors() {
     let totalValue = 0;
     // Amount of active cursors
     let length = 0;
-    for (const c in activeCursors) {
+    for (let c in activeCursors) {
         const data = activeCursors[c];
         totalValue += data.x + data.y;
         length += 1;
