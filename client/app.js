@@ -2,7 +2,8 @@
 
 const WEBSOCKET_URL = 'ws://localhost:3000';
 
-const wss = new WebSocket(WEBSOCKET_URL);
+const uniqueId = guid();
+const wss = new WebSocket(`${WEBSOCKET_URL}?id=${uniqueId}`);
 
 function wssSend(msg) {
     wss.send(JSON.stringify(msg));
@@ -16,6 +17,9 @@ wss.onmessage = function(evt) {
     const payload = JSON.parse(evt.data);
     if (payload.type === 'MOVE_EXT_CURSOR') {
         handleExtCursor(payload.data);
+    }
+    if (payload.type === 'DELETE_CURSOR') {
+        deleteCursor(payload.data);
     }
 };
 
@@ -35,8 +39,6 @@ function s4() {
     .substring(1);
 }
 
-const uniqueId = guid();
-
 // Debouncer
 function debounce(func, wait, immediate) {
     var timeout;
@@ -55,10 +57,18 @@ function debounce(func, wait, immediate) {
 
 // Cursor tracking logic
 function initialize() {
-    document.onmousemove = debounce(handleMouseMove, 10);
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    window.addEventListener('mousemove', debounce(handleMouseMove, 10));
+    window.addEventListener('resize', handleResize);
+    let width;
+    let height;
+    handleResize();
+
     const header = document.getElementById('header');
+
+    function handleResize(event) {
+        width = window.innerWidth;
+        height = window.innerHeight;
+    }
 
     function handleMouseMove(event) {
         const x = event.pageX;
@@ -92,4 +102,13 @@ function handleExtCursor(data) {
     }
     el.style.top = y + '%';
     el.style.left = x + '%';
+}
+
+// Delete cursor logic
+function deleteCursor(data) {
+    const el = document.getElementById(data.id);
+
+    if (el) {
+        document.body.removeChild(el);
+    }
 }
