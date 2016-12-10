@@ -1,3 +1,5 @@
+import throttle from 'lodash.throttle';
+
 // Socket logic
 const uniqueId = guid();
 const wss = new WebSocket(`${CONFIG.socketUrl}?id=${uniqueId}`);
@@ -36,25 +38,9 @@ function s4() {
     .substring(1);
 }
 
-// Debouncer
-function debounce(func, wait, immediate) {
-    var timeout;
-    return function() {
-        var context = this, args = arguments;
-        var later = function() {
-            timeout = null;
-            if (!immediate) func.apply(context, args);
-        };
-        var callNow = immediate && !timeout;
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-        if (callNow) func.apply(context, args);
-    };
-};
-
 // Cursor tracking logic
 function initialize() {
-    window.addEventListener('mousemove', debounce(handleMouseMove, 10));
+    window.addEventListener('mousemove', throttle(handleMouseMove, 20));
     window.addEventListener('resize', handleResize);
     let width;
     let height;

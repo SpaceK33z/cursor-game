@@ -12,6 +12,7 @@
   "author": "Kees Kluskens <kees@webduck.nl>",
   "license": "ISC",
   "dependencies": {
+    "lodash.throttle": "^4.1.1",
     "nodemon": "^1.11.0",
     "uws": "^0.12.0"
   },
