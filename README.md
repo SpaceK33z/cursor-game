@@ -8,3 +8,5 @@ That's it. You can't do anything useful yet. The idea is that this can be the st
 
 Run frontend with `npm run client`.
 Run backend with `npm start`.
+
+Go to `http://localhost:8080` and have fun.
